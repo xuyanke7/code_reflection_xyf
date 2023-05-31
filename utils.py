@@ -43,6 +43,14 @@ def read_jsonl_gz(path: str) -> List[dict]:
     return data
 
 
-# generator that returns the item and the index in the dataset.
-# if the results_path exists, it will skip all items that have been processed
-# before.
+def jsonl2json(jsonlpath: str):
+    jsonpath = jsonlpath.replace(".jsonl", ".json")
+    with jsonlines.open(jsonlpath, mode='r') as jsonlread:
+        with open(jsonpath, "w") as jsonwrite:
+            for item in jsonlread:
+                jsonwrite.write(json.dumps(item) + "\n")
+
+
+if __name__ == "__main__":
+    # jsonl2json("rootdata\humaneval-py_sample30.jsonl")
+    ...

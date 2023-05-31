@@ -91,7 +91,11 @@ def code_general(dataset: List[dict],
         )
         print('----------------------- RESPONSE -----------------------')
         print(res_main)
+        eval_general(item, res_main)
         break
+
+def eval_general(dataitem, response):
+    ...
 
 
 def main(args):
@@ -118,6 +122,8 @@ def main(args):
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
     print(f"Logging to {log_path}")
+
+
     code_general(dataset, args.pass_at_k, log_path, args.model)
 
 
