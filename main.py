@@ -12,10 +12,11 @@ from tenacity import (
     wait_random_exponential,  # type: ignore
 )
 import const
+from executor import function_with_timeout
 
 # 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
 openai.api_key = os.getenv("OPENAI_API_KEY")
-openai.api_key = "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"
+openai.api_key = "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"
 
 
 def parserargs():
@@ -25,11 +26,12 @@ def parserargs():
                         help="The root logging directory", default="rootdata")
     parser.add_argument("--dataset_path", type=str,
                         help="The path to the benchmark dataset", default="rootdata")
-    parser.add_argument("--strategy", type=str,default='general',
+    parser.add_argument("--strategy", type=str, default='general',
                         help="Strategy: `simple`, `reflexion`")
-    parser.add_argument("--language", type=str, help="Strategy: `py` or `rs`",default="py")
+    parser.add_argument("--language", type=str,
+                        help="Strategy: `py` or `rs`", default="py")
     parser.add_argument(
-        "--model", type=str,default="gpt-3.5-turbo", help="OpenAI models only for now. For best results, use GPT-4")
+        "--model", type=str, default="gpt-3.5-turbo", help="OpenAI models only for now. For best results, use GPT-4")
     parser.add_argument("--pass_at_k", type=int,
                         help="Pass@k metric", default=1)
     parser.add_argument("--max_iters", type=int,
@@ -91,11 +93,23 @@ def code_general(dataset: List[dict],
         )
         print('----------------------- RESPONSE -----------------------')
         print(res_main)
-        eval_general(item, res_main)
+        ispass = eval_general(item["entry_point"], res_main, item["test"], timeout = 20)
+        print(f'The {i+1} item,ispass: {ispass}.')
         break
 
-def eval_general(dataitem, response):
-    ...
+
+def eval_general(entrypoint: str, response: str, test: str, timeout: int = 5)->bool:
+    """
+    Evaluates on Human-Eval Py.
+    """
+    code = f"""{response}{test}check({entrypoint})"""
+    try:
+
+        function_with_timeout(exec, (code, globals()), timeout)
+
+        return True
+    except Exception:
+        return False
 
 
 def main(args):
@@ -104,10 +118,10 @@ def main(args):
         os.makedirs(args.root_dir)
 
     # check dataset
-    args.dataset_path = "rootdata\humaneval-py_sample30.jsonl" # tmp
+    args.dataset_path = "rootdata\humaneval-py_sample30.jsonl"  # tmp
     dataset_name = os.path.basename(args.dataset_path).replace("jsonl", "")
     print(f"loading {dataset_name}")
-    
+
     if args.dataset_path.endswith(".jsonl"):
         dataset = read_jsonl(args.dataset_path)
     else:
@@ -122,7 +136,6 @@ def main(args):
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
     print(f"Logging to {log_path}")
-
 
     code_general(dataset, args.pass_at_k, log_path, args.model)
 
