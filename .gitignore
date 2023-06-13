@@ -135,5 +135,5 @@ scratch/
 
 .DS_Store/
 
-# private file
+# private file 
 const.py
