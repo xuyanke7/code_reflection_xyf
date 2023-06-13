@@ -14,9 +14,7 @@ from tenacity import (
 import const
 from executor import function_with_timeout
 
-# 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
-openai.api_key = os.getenv("OPENAI_API_KEY")
-openai.api_key = "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"
+openai.api_key = const.API_KEY
 
 
 def parserargs():
