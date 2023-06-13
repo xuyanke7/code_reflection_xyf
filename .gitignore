@@ -134,3 +134,6 @@ scratch/
 .vscode/
 
 .DS_Store/
+
+# private file
+const.py
